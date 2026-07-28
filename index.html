@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mapa de Dores — Demanda de Cliente · Loginfo</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --blue:    #1642F6;
+    --violet:  #7B61FF;
+    --ink:     #16213A;
+    --paper:   #F2F4F8;
+    --white:   #FFFFFF;
+    --slate:   #6B7590;
+    --line:    #DDE1EE;
+    --line-strong: #C4C9DC;
+    --accent:  #1642F6;
+    --red:     #B91C1C;
+    --green:   #166534;
+    --radius:  5px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'IBM Plex Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; font-size: 14px; line-height: 1.5; }
+
+  /* ── HEADER (Loginfo) ── */
+  .site-header { background: linear-gradient(135deg, #0E30D4 0%, var(--blue) 60%, var(--violet) 100%); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(14,48,212,0.2); }
+  .header-inner { max-width: 920px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; }
+  .logo img { height: 25px; width: auto; display: block; filter: brightness(0) invert(1); }
+  .header-badge { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.12); padding: 4px 11px; border-radius: 99px; border: 1px solid rgba(255,255,255,0.2); }
+
+  /* ── HERO (Loginfo) ── */
+  .hero { background: linear-gradient(135deg, #0E30D4 0%, var(--blue) 45%, var(--violet) 100%); padding: 40px 0 36px; text-align: left; position: relative; overflow: hidden; }
+  .hero-inner { max-width: 920px; margin: 0 auto; padding: 0 32px; }
+  .hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,255,255,0.07) 0%, transparent 70%); pointer-events: none; }
+  .hero-tag { font-family: 'IBM Plex Mono', monospace; display: inline-block; font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.25); padding: 4px 13px; border-radius: 99px; margin-bottom: 14px; }
+  .hero h1 { font-family: 'IBM Plex Sans', sans-serif; font-weight: 600; font-size: clamp(22px, 3.5vw, 32px); color: #fff; line-height: 1.2; margin-bottom: 8px; }
+  .hero p { font-size: 13px; color: rgba(255,255,255,0.6); max-width: 640px; margin: 0; line-height: 1.7; }
+
+  /* ── MAIN ── */
+  .main { max-width: 920px; margin: 0 auto; padding: 24px 32px 72px; }
+
+  /* ── TABS ── */
+  .tabs { display: flex; border-bottom: 1px solid var(--line-strong); margin-bottom: 24px; gap: 0; }
+  .tab-btn { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; padding: 10px 18px; border: none; background: transparent; color: var(--slate); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
+  .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+  .tab-btn:hover:not(.active) { color: var(--ink); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── CARD ── */
+  .card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; margin-bottom: 12px; }
+  .card.required-card { border-left: 3px solid var(--ink); }
+
+  /* ── SECTION TITLE ── */
+  .section-title { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); margin: 0 0 4px; display: flex; align-items: center; gap: 8px; font-weight: 500; }
+  .section-title::before { content: ""; width: 16px; height: 1px; background: var(--blue); flex-shrink: 0; }
+  .section-sub { font-size: 12px; color: var(--slate); margin: 0 0 14px; }
+
+  /* ── FIELDS ── */
+  label { display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 4px; color: var(--ink); }
+  label .req { color: var(--red); font-weight: 700; }
+  .hint { font-size: 11.5px; color: var(--slate); margin: -1px 0 6px; }
+
+  input[type="text"], input[type="date"], textarea, select {
+    width: 100%; font-family: 'IBM Plex Sans', sans-serif; font-size: 13.5px;
+    padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius);
+    background: var(--white); color: var(--ink); margin-bottom: 14px; outline: none;
+    transition: border-color 0.15s;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); outline: 2px solid rgba(22,66,246,0.15); outline-offset: 1px; }
+  input.err, textarea.err, select.err { border-color: var(--red) !important; outline: 2px solid rgba(185,28,28,0.12) !important; }
+  textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
+  select { cursor: pointer; }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
+
+  /* ── CHOICE CARDS ── */
+  .choice-group { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+  .choice-card {
+    border: 1px solid var(--line-strong); border-radius: var(--radius); padding: 7px 12px;
+    cursor: pointer; font-size: 12.5px; display: flex; align-items: center; gap: 6px;
+    background: var(--white); transition: all 0.12s; color: var(--ink); user-select: none;
+  }
+  .choice-card:hover { border-color: var(--ink); }
+  .choice-card.checked { border-color: var(--accent); background: #EEF1FF; color: var(--blue); }
+  .choice-card input { margin: 0; width: auto; accent-color: var(--accent); flex-shrink: 0; }
+
+  .other-input { display: none; margin-top: -6px; margin-bottom: 14px; }
+  .other-input.show { display: block; }
+
+  /* ── ACTIONS ── */
+  .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+  .btn-secondary { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.03em; padding: 9px 18px; border-radius: var(--radius); border: 1px solid var(--line-strong); background: var(--white); color: var(--slate); cursor: pointer; transition: all 0.15s; }
+  .btn-secondary:hover { border-color: var(--ink); color: var(--ink); }
+  .btn-primary { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.03em; padding: 9px 22px; border-radius: var(--radius); border: none; background: var(--blue); color: white; cursor: pointer; transition: all 0.15s; font-weight: 500; }
+  .btn-primary:hover { background: #0E30D4; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ── TOAST ── */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(12px); background: #166534; color: white; padding: 10px 20px; border-radius: var(--radius); font-family: 'IBM Plex Mono', monospace; font-size: 12px; opacity: 0; transition: all 0.25s; z-index: 999; white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.error { background: var(--red); }
+
+  /* ── TOGGLE manter reunião ── */
+  .toggle-row { display: flex; align-items: center; gap: 10px; margin-top: 6px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .toggle-label { font-size: 12px; color: var(--slate); cursor: pointer; user-select: none; }
+  .toggle { position: relative; width: 34px; height: 19px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-track { position: absolute; inset: 0; background: var(--line-strong); border-radius: 99px; transition: background 0.2s; cursor: pointer; }
+  .toggle input:checked + .toggle-track { background: var(--blue); }
+  .toggle-track::after { content: ""; position: absolute; left: 3px; top: 3px; width: 13px; height: 13px; background: white; border-radius: 50%; transition: transform 0.2s; }
+  .toggle input:checked + .toggle-track::after { transform: translateX(15px); }
+  .locked-hint { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--blue); display: none; }
+  .locked-hint.show { display: inline; }
+
+  /* ── BOTÃO PDF ── */
+  .btn-pdf { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.03em; padding: 9px 18px; border-radius: var(--radius); border: 1px solid var(--line-strong); background: var(--white); color: var(--slate); cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-pdf:hover { border-color: var(--ink); color: var(--ink); }
+  .btn-pdf svg { width: 13px; height: 13px; flex-shrink: 0; }
+  .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 10px; flex-wrap: wrap; }
+  .toolbar select { width: auto; margin: 0; font-size: 12.5px; padding: 6px 10px; }
+  .rec-count { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.05em; }
+  .rec-count strong { color: var(--blue); font-size: 18px; display: block; }
+  .records-list { display: flex; flex-direction: column; gap: 8px; }
+  .record-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; border-left: 3px solid var(--blue); }
+  .record-card.alta  { border-left-color: #B91C1C; }
+  .record-card.media { border-left-color: #B45309; }
+  .record-card.baixa { border-left-color: #166534; }
+  .rec-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
+  .rec-cliente { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .rec-meta { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--slate); margin-top: 2px; }
+  .rec-badge { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 3px; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.05em; }
+  .rec-badge.alta  { background: #FEE2E2; color: #B91C1C; }
+  .rec-badge.media { background: #FEF3C7; color: #B45309; }
+  .rec-badge.baixa { background: #DCFCE7; color: #166534; }
+  .rec-badge.nd    { background: var(--paper); color: var(--slate); }
+  .rec-dor { font-size: 12.5px; color: var(--slate); line-height: 1.55; }
+  .rec-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+  .chip { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 2px 7px; background: #EEF1FF; color: var(--blue); border-radius: 3px; }
+  .empty { text-align: center; padding: 40px 20px; color: var(--slate); font-size: 13px; }
+  .note { font-size: 11.5px; color: var(--slate); margin-top: 10px; }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<!-- HEADER LOGINFO -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo"><img src="data:image/png;base64,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" alt="Loginfo" /></div>
+    <span class="header-badge">Demanda de Cliente &middot; Interno</span>
+  </div>
+</header>
+
+<!-- HERO LOGINFO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">Levantamento &middot; Demanda de Cliente</div>
+    <h1>Mapa de Dores</h1>
+    <p>Preenchimento em tempo real com o cliente &mdash; a meta é sair da reunião com o escopo da evolução fechado, sem "levar para análise".</p>
+  </div>
+</div>
+
+<main class="main">
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(event,'form')">Novo registro</button>
+    <button class="tab-btn" onclick="switchTab(event,'records')">Registros coletados <span id="count-badge"></span></button>
+  </div>
+
+  <!-- ═══ FORM ═══ -->
+  <div class="tab-panel active" id="panel-form">
+  <form id="mapa-form" novalidate>
+
+    <div class="card">
+      <p class="section-title">01 · Reuniao</p>
+      <div class="row">
+        <div><label>Cliente <span class="req">*</span></label><input type="text" id="cliente" placeholder="Nome do cliente" /></div>
+        <div><label>Contato(s) presentes <span class="req">*</span></label><input type="text" id="contatos" placeholder="Nomes dos participantes" /></div>
+      </div>
+      <div class="row">
+        <div><label>Consultor / PO responsavel <span class="req">*</span></label><input type="text" id="consultor" placeholder="Seu nome" /></div>
+        <div><label>Data da reuniao <span class="req">*</span></label><input type="date" id="data_reuniao" /></div>
+      </div>
+      <div class="row">
+        <div><label>Numero do ticket <span class="req">*</span></label><input type="text" id="ticket" placeholder="ex: TCK-4821" /></div>
+        <div><label>Data de abertura da solicitacao <span class="req">*</span></label><input type="date" id="data_abertura" /></div>
+      </div>
+      <div class="toggle-row">
+        <label class="toggle" title="Manter dados desta reunião ao salvar o próximo registro">
+          <input type="checkbox" id="toggle-manter" onchange="toggleManter(this)" />
+          <span class="toggle-track"></span>
+        </label>
+        <span class="toggle-label" onclick="document.getElementById('toggle-manter').click()">Manter dados da reunião para o próximo registro</span>
+        <span class="locked-hint" id="locked-hint">● campos travados</span>
+      </div>
+    </div>
+
+    <div class="card required-card">
+      <p class="section-title">02 · Contexto do processo atual (as-is)</p>
+      <p class="section-sub">Entenda o processo inteiro antes de falar de solucao — e aqui que mora o contexto que costuma faltar.</p>
+      <label>O que dispara esse processo hoje? (o "gatilho" / input inicial) <span class="req">*</span></label>
+      <textarea id="gatilho_processo"></textarea>
+      <label>Descreva o passo a passo de como funciona hoje, do inicio ao fim <span class="req">*</span></label>
+      <p class="hint">Sem pular etapas — inclua quem faz o que e em qual tela/modulo/canal.</p>
+      <textarea id="passo_a_passo" style="min-height:100px"></textarea>
+      <label>Qual e o resultado esperado ao final do processo? <span class="req">*</span></label>
+      <textarea id="resultado_esperado"></textarea>
+      <label>Existe algo nesse processo que NAO pode mudar de jeito nenhum? <span class="req">*</span></label>
+      <p class="hint">Se nao houver restricao, escreva "nenhuma identificada" — nao deixe em branco.</p>
+      <textarea id="restricao_processo"></textarea>
+    </div>
+
+    <div class="card">
+      <p class="section-title">03 · Gatilho da demanda</p>
+      <label>O que fez essa demanda surgir agora? <span class="req">*</span></label>
+      <p class="hint">Caso pontual, reclamacao recorrente, exigencia de cliente final, novo processo interno?</p>
+      <textarea id="gatilho_demanda"></textarea>
+    </div>
+
+    <div class="card required-card">
+      <p class="section-title">04 · A dor real</p>
+      <label>O que doi, de fato, hoje? (nao a solucao pedida — o problema) <span class="req">*</span></label>
+      <textarea id="dor_real"></textarea>
+      <label>Exemplo concreto e recente <span class="req">*</span></label>
+      <p class="hint">Uma situacao real vale mais que uma descricao generica.</p>
+      <textarea id="exemplo_concreto"></textarea>
+      <div class="row">
+        <div>
+          <label>Frequencia <span class="req">*</span></label>
+          <select id="frequencia">
+            <option value="">Selecione</option>
+            <option>Diaria</option>
+            <option>Semanal</option>
+            <option>Mensal</option>
+            <option>Sazonal / eventual</option>
+            <option>Uma vez, mas critica</option>
+          </select>
+        </div>
+        <div>
+          <label>Quantidade estimada de usuarios/clientes afetados <span class="req">*</span></label>
+          <input type="text" id="qtd_afetados" placeholder="ex: 12 usuarios internos" />
+        </div>
+      </div>
+      <label>Quem e afetado por essa dor? (marque todas que se aplicam) <span class="req">*</span></label>
+      <div class="choice-group" id="afetados-group">
+        <label class="choice-card"><input type="checkbox" name="afetados" value="Atendimento/Suporte" /> Atendimento/Suporte</label>
+        <label class="choice-card"><input type="checkbox" name="afetados" value="Comercial/Vendas" /> Comercial/Vendas</label>
+        <label class="choice-card"><input type="checkbox" name="afetados" value="Financeiro" /> Financeiro</label>
+        <label class="choice-card"><input type="checkbox" name="afetados" value="Operacoes" /> Operacoes</label>
+        <label class="choice-card"><input type="checkbox" name="afetados" value="Logistica" /> Logistica</label>
+        <label class="choice-card"><input type="checkbox" name="afetados" value="Marketing" /> Marketing</label>
+        <label class="choice-card"><input type="checkbox" name="afetados" value="TI/Sistemas internos" /> TI/Sistemas internos</label>
+        <label class="choice-card"><input type="checkbox" name="afetados" value="Diretoria/Gestao" /> Diretoria/Gestao</label>
+        <label class="choice-card"><input type="checkbox" name="afetados" value="Cliente final (usuario externo)" /> Cliente final (usuario externo)</label>
+        <label class="choice-card"><input type="checkbox" name="afetados" value="Parceiros/Fornecedores" /> Parceiros/Fornecedores</label>
+        <label class="choice-card" id="afetados-outro-card"><input type="checkbox" name="afetados" value="Outro" id="afetados-outro-cb" /> Outro</label>
+      </div>
+      <input type="text" class="other-input" id="afetados_outro" placeholder="Especifique..." />
+    </div>
+
+    <div class="card required-card">
+      <p class="section-title">05 · Regras de negocio, excecoes e restricoes</p>
+      <label>Quais regras de negocio essa mudanca precisa respeitar? <span class="req">*</span></label>
+      <textarea id="regras_negocio"></textarea>
+      <label>Existem excecoes ou casos especiais que fogem da regra geral? <span class="req">*</span></label>
+      <p class="hint">Se nao houver, escreva "nenhuma identificada".</p>
+      <textarea id="excecoes"></textarea>
+      <label>Existe alguma regra legal, contratual ou de compliance envolvida?</label>
+      <textarea id="compliance"></textarea>
+    </div>
+
+    <div class="card required-card">
+      <p class="section-title">06 · Escopo e criterio de aceite</p>
+      <label>Como vamos saber que esta pronto? (criterio de aceite objetivo) <span class="req">*</span></label>
+      <p class="hint">Escreva de forma verificavel: "o usuario consegue X" ou "o sistema passa a fazer Y quando Z acontece".</p>
+      <textarea id="criterio_aceite"></textarea>
+      <label>O que fica explicitamente FORA do escopo dessa entrega? <span class="req">*</span></label>
+      <p class="hint">Reduz retrabalho e expectativa desalinhada depois.</p>
+      <textarea id="fora_escopo"></textarea>
+      <label>Existe dependencia de outro time, sistema ou terceiro para essa entrega?</label>
+      <textarea id="dependencias"></textarea>
+    </div>
+
+    <div class="card required-card">
+      <p class="section-title">07 · Sistemas e modulos impactados</p>
+      <div class="choice-group" id="modulos-group">
+        <label class="choice-card"><input type="checkbox" name="modulos" value="Cadastros" /> Cadastros</label>
+        <label class="choice-card"><input type="checkbox" name="modulos" value="Documento de entrada" /> Documento de entrada</label>
+        <label class="choice-card"><input type="checkbox" name="modulos" value="Agendamento" /> Agendamento</label>
+        <label class="choice-card"><input type="checkbox" name="modulos" value="RESV" /> RESV</label>
+        <label class="choice-card"><input type="checkbox" name="modulos" value="OS de descarga" /> OS de descarga</label>
+        <label class="choice-card"><input type="checkbox" name="modulos" value="Movimentacao de estoque" /> Movimentacao de estoque</label>
+        <label class="choice-card"><input type="checkbox" name="modulos" value="OS interna" /> OS interna</label>
+        <label class="choice-card"><input type="checkbox" name="modulos" value="Inventario" /> Inventario</label>
+        <label class="choice-card"><input type="checkbox" name="modulos" value="Tela de lotes" /> Tela de lotes</label>
+        <label class="choice-card"><input type="checkbox" name="modulos" value="API Recintos" /> API Recintos</label>
+        <label class="choice-card"><input type="checkbox" name="modulos" value="Faturamento" /> Faturamento</label>
+        <label class="choice-card"><input type="checkbox" name="modulos" value="OS de carga" /> OS de carga</label>
+        <label class="choice-card" id="modulos-outro-card"><input type="checkbox" name="modulos" value="Outro" id="modulos-outro-cb" /> Outro</label>
+      </div>
+      <input type="text" class="other-input" id="modulo_outro" placeholder="Qual modulo?" />
+    </div>
+
+    <div class="card required-card">
+      <p class="section-title">08 · Prioridade</p>
+      <label>Prioridade / urgencia <span class="req">*</span></label>
+      <select id="prioridade" style="max-width:320px">
+        <option value="">Selecione</option>
+        <option value="Alta">Alta — travando operacao</option>
+        <option value="Media">Media — incomodo recorrente</option>
+        <option value="Baixa">Baixa — seria bom ter</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <p class="section-title">09 · Aprovacao e proximos passos</p>
+      <label>Quem do lado do cliente precisa validar o escopo final?</label>
+      <input type="text" id="aprovador" placeholder="Nome e cargo do aprovador..." />
+      <label>Observacoes / proximos passos</label>
+      <textarea id="observacoes"></textarea>
+      <div class="actions">
+        <button type="button" class="btn-secondary" onclick="clearForm()">Limpar</button>
+        <button type="submit" class="btn-primary" id="btn-submit">&#10003; Salvar registro</button>
+      </div>
+    </div>
+
+  </form>
+  </div>
+
+  <!-- ═══ RECORDS ═══ -->
+  <div class="tab-panel" id="panel-records">
+    <div class="toolbar">
+      <div class="rec-count"><strong id="total-count">0</strong>registros coletados</div>
+      <select id="filter-sel" onchange="filterRecords(this.value)">
+        <option value="all">Todas as prioridades</option>
+        <option value="Alta">Alta</option>
+        <option value="Media">Media</option>
+        <option value="Baixa">Baixa</option>
+      </select>
+    </div>
+    <div id="records-list" class="records-list">
+      <div class="empty"><p>Nenhum registro ainda. Preencha o formulario para comecar.</p></div>
+    </div>
+    <p class="note">Os registros ficam salvos nesta aba/sessao. Use a aba "Novo registro" para adicionar mais.</p>
+  </div>
+
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const SCRIPT_URL = 'COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT';
+
+let localRecords = [];
+let currentFilter = 'all';
+
+// choice-cards toggle
+document.querySelectorAll('.choice-group').forEach(group => {
+  group.querySelectorAll('.choice-card').forEach(card => {
+    card.addEventListener('click', function(e) {
+      if (e.target.tagName === 'INPUT') return;
+      const inp = card.querySelector('input');
+      inp.checked = !inp.checked;
+      inp.dispatchEvent(new Event('change'));
+    });
+    const inp = card.querySelector('input');
+    inp.addEventListener('change', function() {
+      card.classList.toggle('checked', this.checked);
+      // "Outro" fields
+      if (this.value === 'Outro') {
+        const otherId = this.name === 'modulos' ? 'modulo_outro' : 'afetados_outro';
+        const otherEl = document.getElementById(otherId);
+        if (otherEl) {
+          otherEl.classList.toggle('show', this.checked);
+          otherEl.required = this.checked;
+          if (!this.checked) otherEl.value = '';
+        }
+      }
+    });
+  });
+});
+
+function switchTab(e, tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+  e.target.classList.add('active');
+  if (tab === 'records') renderRecords();
+}
+
+function getPriorityClass(p) {
+  if (p === 'Alta') return 'alta';
+  if (p === 'Media') return 'media';
+  if (p === 'Baixa') return 'baixa';
+  return 'nd';
+}
+
+function renderRecords() {
+  const list = document.getElementById('records-list');
+  const filtered = currentFilter === 'all' ? localRecords : localRecords.filter(r => r.prioridade === currentFilter);
+  document.getElementById('total-count').textContent = localRecords.length;
+  updateBadge();
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty"><p>' + (localRecords.length === 0 ? 'Nenhum registro ainda. Preencha o formulario para comecar.' : 'Nenhum registro com esse filtro.') + '</p></div>';
+    return;
+  }
+  list.innerHTML = filtered.map((r, i) => {
+    const pc = getPriorityClass(r.prioridade);
+    const bl = {alta:'ALTA', media:'MÉDIA', baixa:'BAIXA', nd:'—'}[pc];
+    const chips = (r.modulos||'').split(' | ').filter(Boolean).slice(0,6).map(m => '<span class="chip">'+m+'</span>').join('');
+    const dor = r.dor_real ? r.dor_real.substring(0,220)+(r.dor_real.length>220?'...':'') : '—';
+    const idx = localRecords.indexOf(r);
+    return '<div class="record-card '+pc+'">'
+      + '<div class="rec-top">'
+      +   '<div><div class="rec-cliente">'+(r.cliente||'—')+'</div>'
+      +   '<div class="rec-meta">'+(r.ticket||'')+(r.data_reuniao?' · '+r.data_reuniao:'')+(r.consultor?' · '+r.consultor:'')+'</div></div>'
+      +   '<div style="display:flex;align-items:center;gap:8px;">'
+      +     '<span class="rec-badge '+pc+'">'+bl+'</span>'
+      +     '<button class="btn-pdf" onclick="exportPDF('+idx+')" title="Exportar PDF">'
+      +       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>'
+      +       ' PDF'
+      +     '</button>'
+      +   '</div>'
+      + '</div>'
+      + '<div class="rec-dor">'+dor+'</div>'
+      + (chips ? '<div class="rec-chips">'+chips+'</div>' : '')
+      + '</div>';
+  }).join('');
+}
+
+function filterRecords(filter) {
+  currentFilter = filter;
+  renderRecords();
+}
+
+function updateBadge() {
+  document.getElementById('count-badge').textContent = localRecords.length > 0 ? ' ('+localRecords.length+')' : '';
+}
+
+function f(id) { return (document.getElementById(id)||{}).value?.trim()||''; }
+function checks(name) { return Array.from(document.querySelectorAll('input[name="'+name+'"]:checked')).map(i=>i.value).join(' | '); }
+
+function collectData() {
+  return {
+    data_registro: new Date().toLocaleString('pt-BR'),
+    cliente: f('cliente'), contatos: f('contatos'), consultor: f('consultor'),
+    data_reuniao: f('data_reuniao'), ticket: f('ticket'), data_abertura: f('data_abertura'),
+    gatilho_processo: f('gatilho_processo'), passo_a_passo: f('passo_a_passo'),
+    resultado_esperado: f('resultado_esperado'), restricao_processo: f('restricao_processo'),
+    gatilho_demanda: f('gatilho_demanda'), dor_real: f('dor_real'),
+    exemplo_concreto: f('exemplo_concreto'), frequencia: f('frequencia'),
+    qtd_afetados: f('qtd_afetados'), afetados: checks('afetados'), afetados_outro: f('afetados_outro'),
+    regras_negocio: f('regras_negocio'), excecoes: f('excecoes'), compliance: f('compliance'),
+    criterio_aceite: f('criterio_aceite'), fora_escopo: f('fora_escopo'), dependencias: f('dependencias'),
+    modulos: checks('modulos'), modulo_outro: f('modulo_outro'),
+    prioridade: f('prioridade'), aprovador: f('aprovador'), observacoes: f('observacoes'),
+  };
+}
+
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast'+(isError?' error':'')+' show';
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+async function sendToSheets(data) {
+  // no-cors não retorna status — tentamos 2x com timeout para aumentar confiabilidade
+  const body = JSON.stringify(data);
+  const opts  = { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body };
+
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 8000); // 8s timeout
+      await fetch(SCRIPT_URL, { ...opts, signal: ctrl.signal });
+      clearTimeout(timer);
+      return true; // no-cors sempre retorna resposta opaca — consideramos sucesso
+    } catch (err) {
+      if (attempt === 2) throw err; // falhou nas 2 tentativas
+      await new Promise(r => setTimeout(r, 1000)); // espera 1s antes de retry
+    }
+  }
+}
+
+const REQUIRED = ['cliente','contatos','consultor','data_reuniao','ticket','data_abertura',
+  'gatilho_processo','passo_a_passo','resultado_esperado','restricao_processo',
+  'gatilho_demanda','dor_real','exemplo_concreto','frequencia','qtd_afetados',
+  'regras_negocio','excecoes','criterio_aceite','fora_escopo','prioridade'];
+
+document.getElementById('mapa-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  for (const id of REQUIRED) {
+    const el = document.getElementById(id);
+    if (!el || !el.value.trim()) {
+      el?.scrollIntoView({ behavior:'smooth', block:'center' });
+      el?.classList.add('err');
+      setTimeout(() => el?.classList.remove('err'), 2000);
+      showToast('Preencha todos os campos obrigatórios.', true);
+      return;
+    }
+  }
+
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+
+  const data = collectData();
+
+  // Salva local primeiro — garante que o registro não se perde mesmo se o Sheets falhar
+  localRecords.unshift(data);
+  updateBadge();
+
+  // Envia para o Sheets se URL configurada
+  if (SCRIPT_URL && SCRIPT_URL !== 'COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT') {
+    btn.textContent = 'Enviando para Sheets...';
+    try {
+      await sendToSheets(data);
+      showToast('✓ Registro salvo e enviado para o Sheets!');
+    } catch (err) {
+      // Falhou no envio mas o registro já está local
+      showToast('✓ Salvo localmente — falha ao enviar para o Sheets. Tente novamente.', true);
+      console.warn('Sheets error:', err);
+    }
+  } else {
+    showToast('✓ Registro salvo! (Sheets não configurado)');
+  }
+
+  clearForm();
+  btn.disabled = false;
+  btn.textContent = '✓ Salvar registro';
+});
+
+// ── TOGGLE MANTER REUNIÃO ──
+const REUNIAO_FIELDS = ['cliente','contatos','consultor','data_reuniao'];
+
+function toggleManter(cb) {
+  const hint = document.getElementById('locked-hint');
+  hint.classList.toggle('show', cb.checked);
+  REUNIAO_FIELDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.readOnly = cb.checked;
+      el.style.opacity = cb.checked ? '0.6' : '1';
+      el.style.cursor  = cb.checked ? 'default' : '';
+    }
+  });
+}
+
+function clearForm() {
+  const manter = document.getElementById('toggle-manter').checked;
+  // Salva dados da reunião antes de resetar
+  const saved = {};
+  if (manter) REUNIAO_FIELDS.forEach(id => { saved[id] = document.getElementById(id)?.value || ''; });
+
+  document.getElementById('mapa-form').reset();
+  document.querySelectorAll('.choice-card').forEach(c => c.classList.remove('checked'));
+  document.querySelectorAll('.other-input').forEach(i => { i.classList.remove('show'); i.required = false; i.value = ''; });
+
+  // Restaura dados da reunião se toggle ativo
+  if (manter) {
+    REUNIAO_FIELDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.value = saved[id]; el.readOnly = true; el.style.opacity = '0.6'; }
+    });
+  }
+}
+
+// ── EXPORT PDF ──
+function exportPDF(idx) {
+  const r = localRecords[idx];
+  if (!r) { showToast('Registro não encontrado.', true); return; }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const W = 210, M = 18, CW = W - M * 2;
+  let y = 32;
+
+  function val(key) { return String(r[key] || '—'); }
+
+  function addSection(title) {
+    if (y > 262) { doc.addPage(); y = 20; }
+    y += 4;
+    doc.setFillColor(22, 66, 246);
+    doc.rect(M, y - 4.5, CW, 7, 'F');
+    doc.setFontSize(8.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255);
+    doc.text(title, M + 3, y);
+    y += 5; doc.setTextColor(22, 33, 58);
+  }
+
+  function addField(label, value) {
+    if (y > 268) { doc.addPage(); y = 20; }
+    doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(100, 110, 145);
+    doc.text(label, M, y); y += 4.5;
+    doc.setFont('helvetica', 'normal'); doc.setTextColor(22, 33, 58); doc.setFontSize(10);
+    const lines = doc.splitTextToSize(value || '—', CW);
+    lines.forEach(line => {
+      if (y > 273) { doc.addPage(); y = 20; }
+      doc.text(line, M, y); y += 5;
+    });
+    y += 1.5;
+  }
+
+  // Cabeçalho
+  doc.setFillColor(22, 66, 246);
+  doc.rect(0, 0, W, 24, 'F');
+  doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255);
+  doc.text('MAPA DE DORES \u2014 P\u00D3S-VENDA', M, 11);
+  doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(200, 210, 255);
+  doc.text('Loginfo \u00B7 Levantamento P\u00F3s-venda \u00B7 ' + (r.data_registro || ''), M, 18);
+
+  addSection('01 \u00B7 Reuni\u00E3o');
+  addField('Cliente', val('cliente'));
+  addField('Contato(s) presentes', val('contatos'));
+  addField('Consultor / PO respons\u00E1vel', val('consultor'));
+  addField('Data da reuni\u00E3o', val('data_reuniao'));
+  addField('N\u00FAmero do ticket', val('ticket'));
+  addField('Data de abertura da solicita\u00E7\u00E3o', val('data_abertura'));
+
+  addSection('02 \u00B7 Contexto do processo atual (as-is)');
+  addField('O que dispara esse processo hoje?', val('gatilho_processo'));
+  addField('Passo a passo atual', val('passo_a_passo'));
+  addField('Resultado esperado', val('resultado_esperado'));
+  addField('Restri\u00E7\u00F5es imut\u00E1veis', val('restricao_processo'));
+
+  addSection('03 \u00B7 Gatilho da demanda');
+  addField('O que fez essa demanda surgir agora?', val('gatilho_demanda'));
+
+  addSection('04 \u00B7 A dor real');
+  addField('A dor real', val('dor_real'));
+  addField('Exemplo concreto e recente', val('exemplo_concreto'));
+  addField('Frequ\u00EAncia', val('frequencia'));
+  addField('Quantidade estimada de afetados', val('qtd_afetados'));
+  addField('Quem \u00E9 afetado', val('afetados') + (r.afetados_outro && r.afetados_outro !== '—' ? ' / ' + r.afetados_outro : ''));
+
+  addSection('05 \u00B7 Regras de neg\u00F3cio, exce\u00E7\u00F5es e restri\u00E7\u00F5es');
+  addField('Regras de neg\u00F3cio', val('regras_negocio'));
+  addField('Exce\u00E7\u00F5es / casos especiais', val('excecoes'));
+  addField('Compliance / Legal', r.compliance || 'N\u00E3o informado');
+
+  addSection('06 \u00B7 Escopo e crit\u00E9rio de aceite');
+  addField('Crit\u00E9rio de aceite', val('criterio_aceite'));
+  addField('Fora do escopo', val('fora_escopo'));
+  addField('Depend\u00EAncias', r.dependencias || 'N\u00E3o informado');
+
+  addSection('07 \u00B7 Sistemas e m\u00F3dulos impactados');
+  addField('M\u00F3dulos', (r.modulos || '') + (r.modulo_outro && r.modulo_outro !== '—' ? ' / ' + r.modulo_outro : '') || 'N\u00E3o informado');
+
+  addSection('08 \u00B7 Prioridade');
+  addField('Prioridade / urg\u00EAncia', val('prioridade'));
+
+  addSection('09 \u00B7 Aprova\u00E7\u00E3o e pr\u00F3ximos passos');
+  addField('Aprovador do cliente', r.aprovador || 'N\u00E3o informado');
+  addField('Observa\u00E7\u00F5es / pr\u00F3ximos passos', r.observacoes || 'N\u00E3o informado');
+
+  // Rodapé em todas as páginas
+  const total = doc.getNumberOfPages();
+  for (let i = 1; i <= total; i++) {
+    doc.setPage(i);
+    doc.setFontSize(7.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(170, 175, 195);
+    doc.text('Loginfo \u00B7 Mapa de Dores \u00B7 ' + new Date().toLocaleDateString('pt-BR') + ' \u00B7 P\u00E1g. ' + i + '/' + total, M, 291);
+  }
+
+  const nomeCliente = (r.cliente || 'cliente').replace(/\s+/g, '-').toLowerCase();
+  const dataDoc     = (r.data_reuniao || new Date().toISOString().slice(0, 10));
+  doc.save('demanda-cliente_' + nomeCliente + '_' + dataDoc + '.pdf');
+}
+
+
+</script>
+</body>
+</html>
