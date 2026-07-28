@@ -357,7 +357,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const SCRIPT_URL = 'COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBAMxUmURJEs3qonw5Nbq4MAwyL_IpIlXb7GamY1ZsYbPE92CR82jA8bLzP-ybnt_W/exec';
 
 let localRecords = [];
 let currentFilter = 'all';
@@ -480,7 +480,7 @@ document.getElementById('mapa-form').addEventListener('submit', async function(e
   const btn = document.getElementById('btn-submit');
   btn.disabled = true; btn.textContent = 'Salvando...';
   const data = collectData();
-  if (SCRIPT_URL && SCRIPT_URL !== 'COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT') {
+  if (SCRIPT_URL && SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbwBAMxUmURJEs3qonw5Nbq4MAwyL_IpIlXb7GamY1ZsYbPE92CR82jA8bLzP-ybnt_W/exec') {
     try { await sendToSheets(data); } catch(err) { console.warn(err); }
   }
   localRecords.unshift(data);
