@@ -388,7 +388,7 @@
 const SCRIPT_URL_STORAGE_KEY = 'loginfo_mapa_script_url';
 
 // Carrega URL salva no localStorage (se existir)
-let SCRIPT_URL = localStorage.getItem(SCRIPT_URL_STORAGE_KEY) || 'COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT';
+let SCRIPT_URL = localStorage.getItem(SCRIPT_URL_STORAGE_KEY) || 'https://script.google.com/macros/s/AKfycbzTmWjkSogcPfyh8z_F2kEg6LXUoFVHsL7ebO_OrsjKz7KilOVHFXdKzYnyMe_pFm3ZVQ/exec';
 
 let localRecords = [];
 let currentFilter = 'all';
@@ -549,7 +549,7 @@ document.getElementById('mapa-form').addEventListener('submit', async function(e
   updateBadge();
 
   // Envia para o Sheets se URL configurada
-  if (SCRIPT_URL && SCRIPT_URL !== 'COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT') {
+  if (SCRIPT_URL && SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbzTmWjkSogcPfyh8z_F2kEg6LXUoFVHsL7ebO_OrsjKz7KilOVHFXdKzYnyMe_pFm3ZVQ/exec') {
     btn.textContent = 'Enviando para Sheets...';
     try {
       await sendToSheets(data);
@@ -622,7 +622,7 @@ function updateConfigPanel() {
   const labelText = document.getElementById('config-label-text');
   const status    = document.getElementById('config-status');
   const input     = document.getElementById('config-url-input');
-  const isOk      = SCRIPT_URL && SCRIPT_URL !== 'COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT';
+  const isOk      = SCRIPT_URL && SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbzTmWjkSogcPfyh8z_F2kEg6LXUoFVHsL7ebO_OrsjKz7KilOVHFXdKzYnyMe_pFm3ZVQ/exec';
 
   panel.className = 'config-panel' + (isOk ? ' ok' : '');
   if (isOk) {
